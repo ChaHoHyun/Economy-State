@@ -18,6 +18,8 @@ def post_message(token, channel, text):
                              )
 
 
+post_message(myToken, "#stock", "Start!")
+
 # 스케쥴 모듈이 동작시킬 함수
 
 
