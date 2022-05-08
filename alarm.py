@@ -7,7 +7,7 @@ import sys
 import pandas as pd
 import FinanceDataReader as fdr
 
-myToken = "myToken"
+myToken = "xoxb-3393394809364-3388200038437-lGtPYrMP3cI2NkejnZ1NToPf"
 
 
 def post_message(token, channel, text):
@@ -16,9 +16,6 @@ def post_message(token, channel, text):
                              headers={"Authorization": "Bearer "+token},
                              data={"channel": channel, "text": text}
                              )
-
-
-post_message(myToken, "#stock", "Start!")
 
 # 스케쥴 모듈이 동작시킬 함수
 
@@ -34,19 +31,11 @@ def test_function():
     else:
         pass
     # Slack에 보낼 메세지
-    post_message(myToken, "#stock", "Date : " + date + "\n" +
+    post_message(myToken, "#practice", "Date : " + date + "\n" +
                  " - T10Y2Y : "+str(t10y2y)+"\n"+" - T10Y3M : "+str(t10y3m))
 
 
-# 매일 오후 7:55분에 test_function 실행
-schedule.every().day.at("12:00").do(test_function)
+def test_alarm():
+    print("Good!")
+    post_message(myToken, "#practice", "GOOD!")
 
-# 무한 루프를 돌면서 스케쥴을 유지한다.
-while True:
-    try:
-        schedule.run_pending()
-        time.sleep(1)
-    except Exception as e:
-        print(e)
-        post_message(myToken, "#stock", e)
-        time.sleep(1)
