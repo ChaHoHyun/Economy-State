@@ -7,7 +7,7 @@ import sys
 import pandas as pd
 import FinanceDataReader as fdr
 
-myToken = "xoxb-3393394809364-3388200038437-lGtPYrMP3cI2NkejnZ1NToPf"
+myToken = "myToken"
 
 
 def post_message(token, channel, text):
@@ -37,5 +37,5 @@ def test_function():
 
 def test_alarm():
     print("Good!")
-    post_message(myToken, "#practice", "GOOD!")
+    post_message(myToken, "#flex", "GOOD!")
 
