@@ -2,7 +2,13 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import datetime as dt
+import matplotlib.pyplot as plt
 from pandas_datareader import data as pdr
+
+# Figure Setting
+plt.rcParams["font.family"] = 'NanumGothic'
+# plt.rcParams["axes.grid"] = True
+plt.rcParams["figure.figsize"] = (20, 10)
 
 # Every month 1,000,000 won
 money = 1000000
@@ -21,7 +27,6 @@ startday = 1
 
 start = dt.datetime(startyear, startmonth, startday)
 end = dt.datetime.now()
-
 # --------------------------------------------------------------------------------
 
 # Import data
@@ -37,8 +42,8 @@ qqq = qqq.drop(['High', 'Low', 'Open', 'Close', 'Volume'], axis=1)
 # Merge each data
 df = pd.merge(qqq, krw["Adj Close"], how='left', on='Date')
 # Change Column name
-df.rename(columns = {'Adj Close_x':'qqq_price','Adj Close_y':'dollar'},inplace=True)
-
+df.rename(columns={'Adj Close_x': 'qqq_price',
+          'Adj Close_y': 'dollar'}, inplace=True)
 # --------------------------------------------------------------------------------
 
 # BackTesting
@@ -48,18 +53,18 @@ buy_list = []
 for x in range(len(df['year'].unique())):
     if df['year'].unique()[x] != end.year:
         year_df = df[df['year'] == df['year'].unique()[x]]
-        remains=0
-        for i in range(1,13):
+        remains = 0
+        for i in range(1, 13):
             month_df = year_df[year_df['month'] == i]
             # Current date
             current_date = month_df.iloc[-5]["Date"].strftime('%Y-%m-%d')
             # qqq Current Price
-            qqq_price = round(month_df.iloc[-5]['qqq_price'],2)
+            qqq_price = round(month_df.iloc[-5]['qqq_price'], 2)
             # dollar Current Price
-            dollar_price = round(month_df.iloc[-5]['dollar'],2)
+            dollar_price = round(month_df.iloc[-5]['dollar'], 2)
 
             # Error : QQQ has value, but No dollar in month_df
-            x=0
+            x = 0
             while pd.isnull(dollar_price):
                 x += 1
                 dollar_price = month_df.iloc[-5-x]['dollar']
@@ -73,27 +78,28 @@ for x in range(len(df['year'].unique())):
 
             # total list
             total_list = {
-                'date' : current_date,
-                'QQQ price' : qqq_price,
-                'Dollar price' : dollar_price,
-                'qqq_buy_quantity' : qqq_buy_quantity
+                'date': current_date,
+                'QQQ price': qqq_price,
+                'Dollar price': dollar_price,
+                'qqq_buy_quantity': qqq_buy_quantity
             }
             buy_list.append(total_list)
     else:
         year_df = df[df["year"] == end.year]
-        remains=0
+        remains = 0
         # We buy until previous month
         for j in range(df["month"].iloc[-1] - 1):
             # Make dataframe every month this year
-            month_df = year_df[year_df['month'] == year_df['month'].unique()[j]]
+            month_df = year_df[year_df['month']
+                               == year_df['month'].unique()[j]]
             current_date = month_df.iloc[-5]["Date"].strftime('%Y-%m-%d')
             # qqq Current Price
-            qqq_price = round(month_df.iloc[-5]['qqq_price'],2)
+            qqq_price = round(month_df.iloc[-5]['qqq_price'], 2)
             # dollar Current Price
-            dollar_price = round(month_df.iloc[-5]['dollar'],2)
+            dollar_price = round(month_df.iloc[-5]['dollar'], 2)
 
             # Error : QQQ has value, but No dollar in month_df
-            x=0
+            x = 0
             while pd.isnull(dollar_price):
                 x += 1
                 dollar_price = month_df.iloc[-5-x]['dollar']
@@ -107,32 +113,61 @@ for x in range(len(df['year'].unique())):
 
             # total list
             total_list = {
-                'date' : current_date,
-                'QQQ price' : qqq_price,
-                'Dollar price' : dollar_price,
-                'qqq_buy_quantity' : qqq_buy_quantity
+                'date': current_date,
+                'QQQ price': qqq_price,
+                'Dollar price': dollar_price,
+                'qqq_buy_quantity': qqq_buy_quantity
             }
             buy_list.append(total_list)
 
-# Save buy list csv file about QQQ Backtest Strategy        
+# Convert buy list csv file about QQQ Backtest Strategy
 qqq_buy_list = pd.DataFrame.from_dict(buy_list)
-qqq_buy_list.to_csv("./backtest_result/qqq_buy_list_at25.csv", index=False)
+# --------------------------------------------------------------------------------
+# Revenue & MDD
+# total = QQQ price x Dollar price x qqq_buy_quantity
+qqq_buy_list['total'] = 0
+qqq_buy_list['revenue_rate'] = 0
+qqq_buy_list['current_value'] = 0
+qqq_buy_list['mdd'] = 0
+for i in range(len(qqq_buy_list)):
+    qqq_buy_list.iloc[i, 4] = int(qqq_buy_list.iloc[i, 1] *
+                                  qqq_buy_list.iloc[i, 2] * qqq_buy_list.iloc[i, 3])
+    investment_from_now = qqq_buy_list.iloc[0:(i+1), 4].sum()
+    current_total_valuation = qqq_buy_list.iloc[i, 1] * \
+        qqq_buy_list.iloc[0:i+1, 3].sum() * qqq_buy_list.iloc[i, 2]
+    qqq_buy_list['revenue_rate'].iloc[i] = round((current_total_valuation /
+                                                  investment_from_now-1)*100, 2)
 
-# Total Revenue
-QQQ_price = qqq_buy_list.iloc[0]["QQQ price"]
-QQQ_quantity = qqq_buy_list.iloc[0]["qqq_buy_quantity"]
-Dollar = qqq_buy_list.iloc[0]["Dollar price"]
+    current_value = round(qqq_buy_list.iloc[i, 1] * qqq_buy_list.iloc[i, 2], 2)
+    qqq_buy_list['current_value'].iloc[i] = current_value
+    max_value = qqq_buy_list.iloc[0:(i+1), 6].max()
+    qqq_buy_list['mdd'].iloc[i] = round(
+        (qqq_buy_list['current_value'].iloc[i] - max_value)/max_value*100, 2)
+# --------------------------------------------------------------------------------
+# Save qqq_buy_list by CSV file
+ticker = stock.lower()
+qqq_buy_list.drop(['total', 'current_value'], axis=1, inplace=True)
+qqq_buy_list.set_index(keys=qqq_buy_list['date'], inplace=True, drop=True)
+qqq_buy_list.to_csv(
+    f"./backtest_result/{ticker}_buy_list_at25.csv", index=False)
+# --------------------------------------------------------------------------------
+# Visualization
+fig, ax1 = plt.subplots()
+ax1 = qqq_buy_list['revenue_rate'].plot(
+    color='blue', alpha=0.3, legend='Revenue Rate (%)')
+ax2 = ax1.twinx()
+ax2 = qqq_buy_list['mdd'].plot(
+    color='red', alpha=0.3, legend='MDD Rate (%)')
 
-QQQ_price1 = qqq_buy_list.iloc[100]["QQQ price"]
-QQQ_quantity1 = qqq_buy_list.iloc[100]["qqq_buy_quantity"]
-Dollar1 = qqq_buy_list.iloc[100]["Dollar price"]
+ax1.fill_between(qqq_buy_list.index, qqq_buy_list['revenue_rate'], alpha=0.2)
+ax2.fill_between(qqq_buy_list.index,
+                 qqq_buy_list['mdd'], alpha=0.2, color='red')
 
-print(QQQ_price*QQQ_quantity*Dollar + QQQ_price1*QQQ_quantity1*Dollar1)
-print(QQQ_price1*(QQQ_quantity1 + QQQ_quantity)*Dollar1)
-print((QQQ_price1*(QQQ_quantity1 + QQQ_quantity)*Dollar1/(QQQ_price*QQQ_quantity*Dollar + QQQ_price1*QQQ_quantity1*Dollar1)-1)*100)
-
-
-    
-
-
-
+ax1.set_xlabel('Date', fontsize=20, labelpad=15, weight='bold')
+ax1.set_ylabel('Revenue Rate (%)', fontsize=20, labelpad=15)
+ax2.set_ylabel('MDD Rate (%)', fontsize=20, labelpad=15)
+ax1.legend(loc='lower left', fontsize=12)
+ax2.legend(loc='upper right', fontsize=12)
+plt.title('Buy QQQ always at 25th', fontsize=25, pad=25, weight='bold')
+plt.savefig(f'./backtest_result/{ticker}_backtest_result')
+plt.show()
