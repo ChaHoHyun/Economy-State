@@ -1,0 +1,11 @@
+--------------------------------------------------
+Total Investment Price 194,634,646 won
+How many times buy? 196th
+Average Invest price 993,033 won
+Current Valuation Price 1,098,042,923.0106 won
+--------------------------------------------------
+MDD (Max) : -23.98 %
+MDD (Now) : -13.85 %
+Revenue rate (Max) : 565.52 %
+Revenue rate (Now) : 464.16 won
+--------------------------------------------------

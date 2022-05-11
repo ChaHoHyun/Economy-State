@@ -6,9 +6,8 @@ import matplotlib.pyplot as plt
 from pandas_datareader import data as pdr
 
 # Figure Setting
-plt.rcParams["font.family"] = 'NanumGothic'
 # plt.rcParams["axes.grid"] = True
-plt.rcParams["figure.figsize"] = (20, 10)
+plt.rcParams["figure.figsize"] = (15, 10)
 
 # Every month 1,000,000 won
 money = 1000000
@@ -45,9 +44,7 @@ df = pd.merge(qqq, krw["Adj Close"], how='left', on='Date')
 df.rename(columns={'Adj Close_x': 'qqq_price',
           'Adj Close_y': 'dollar'}, inplace=True)
 # --------------------------------------------------------------------------------
-
 # BackTesting
-# revision : How to 나머지 값을 total asset에 더해주고 추가적으로 더 사게 하는 법?
 
 buy_list = []
 for x in range(len(df['year'].unique())):
@@ -135,17 +132,42 @@ for i in range(len(qqq_buy_list)):
     investment_from_now = qqq_buy_list.iloc[0:(i+1), 4].sum()
     current_total_valuation = qqq_buy_list.iloc[i, 1] * \
         qqq_buy_list.iloc[0:i+1, 3].sum() * qqq_buy_list.iloc[i, 2]
-    qqq_buy_list['revenue_rate'].iloc[i] = round((current_total_valuation /
-                                                  investment_from_now-1)*100, 2)
+    qqq_buy_list['revenue_rate'].iloc[i] = round(((current_total_valuation /
+                                                  investment_from_now)-1)*100, 2)
 
     current_value = round(qqq_buy_list.iloc[i, 1] * qqq_buy_list.iloc[i, 2], 2)
     qqq_buy_list['current_value'].iloc[i] = current_value
     max_value = qqq_buy_list.iloc[0:(i+1), 6].max()
     qqq_buy_list['mdd'].iloc[i] = round(
         (qqq_buy_list['current_value'].iloc[i] - max_value)/max_value*100, 2)
+
+# --------------------------------------------------------------------------------
+# Result and Save .txr file
+mdd_min = qqq_buy_list['mdd'].min()
+mdd_now = qqq_buy_list['mdd'].iloc[-1]
+
+ticker = stock.lower()
+txt_file = open(
+    f"./backtest_result/{ticker}_results.txt", "w", encoding='utf8')
+print("-"*50, file=txt_file)
+print(
+    f"Total Investment Price {format(investment_from_now, ',')} won", file=txt_file)
+print(f"How many times buy? {len(qqq_buy_list)}th", file=txt_file)
+print(
+    f"Average Invest price {format(int(investment_from_now/len(qqq_buy_list)), ',')} won", file=txt_file)
+print(
+    f"Current Valuation Price {format(current_total_valuation, ',')} won", file=txt_file)
+print("-"*50, file=txt_file)
+print(f"MDD (Max) : {mdd_min} %", file=txt_file)
+print(f"MDD (Now) : {mdd_now} %", file=txt_file)
+print(
+    f"Revenue rate (Max) : {qqq_buy_list['revenue_rate'].max()} %", file=txt_file)
+print(
+    f"Revenue rate (Now) : {qqq_buy_list['revenue_rate'].iloc[-1]} won", file=txt_file)
+print("-"*50, file=txt_file)
+
 # --------------------------------------------------------------------------------
 # Save qqq_buy_list by CSV file
-ticker = stock.lower()
 qqq_buy_list.drop(['total', 'current_value'], axis=1, inplace=True)
 qqq_buy_list.set_index(keys=qqq_buy_list['date'], inplace=True, drop=True)
 qqq_buy_list.to_csv(
@@ -166,8 +188,24 @@ ax2.fill_between(qqq_buy_list.index,
 ax1.set_xlabel('Date', fontsize=20, labelpad=15, weight='bold')
 ax1.set_ylabel('Revenue Rate (%)', fontsize=20, labelpad=15)
 ax2.set_ylabel('MDD Rate (%)', fontsize=20, labelpad=15)
+
+ax1.axhline(qqq_buy_list['revenue_rate'].iloc[-1], 0, 1,
+            color='blue', linestyle='--', linewidth=1, alpha=0.5)
+ax2.axhline(mdd_now, 0, 1, color='red', linestyle='--', linewidth=1, alpha=0.5)
+
+ax1.set_xlim(qqq_buy_list.index[0], qqq_buy_list.index[-1])
+ax1.set_ylim(0, qqq_buy_list['revenue_rate'].max())
+ax2.set_ylim(mdd_min*2, 0)
+
 ax1.legend(loc='lower left', fontsize=12)
 ax2.legend(loc='upper right', fontsize=12)
-plt.title('Buy QQQ always at 25th', fontsize=25, pad=25, weight='bold')
+export_now = f"NOW\nMDD : {mdd_now}%\nRevenue : {qqq_buy_list['revenue_rate'].iloc[-1]}%"
+ax2.text(17, -37, export_now, fontsize=10, color="black",
+         verticalalignment='top', horizontalalignment='center',
+         bbox={'facecolor': 'whitesmoke', 'pad': 10})
+plt.title(f'Buy {stock} always at 25th', fontsize=25, pad=25, weight='bold')
+
 plt.savefig(f'./backtest_result/{ticker}_backtest_result')
+# qqq_buy_list.plot(style='candlestick', barup='red',
+#                   bardown='blue', xtight=True, ytight=True, grid=True)
 plt.show()
