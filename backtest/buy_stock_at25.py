@@ -42,7 +42,7 @@ qqq = qqq.drop(['High', 'Low', 'Open', 'Close', 'Volume'], axis=1)
 df = pd.merge(qqq, krw["Adj Close"], how='left', on='Date')
 # Change Column name
 df.rename(columns={'Adj Close_x': 'qqq_price',
-          'Adj Close_y': 'dollar'}, inplace=True)
+                   'Adj Close_y': 'dollar'}, inplace=True)
 # --------------------------------------------------------------------------------
 # BackTesting
 
@@ -116,7 +116,15 @@ for x in range(len(df['year'].unique())):
                 'qqq_buy_quantity': qqq_buy_quantity
             }
             buy_list.append(total_list)
-
+# -----------------------------code revision-----------------------------------------
+# year_list = qqq_krw["year"].unique()
+# for i in range(len(year_list)):
+#     year_df = qqq_krw[qqq_krw["year"] == year_list[i]]
+#     month_list = year_df['month'].unique()
+#     for j in range(len(month_list)):
+#         month_df = year_df[year_df['month'] == month_list[j]]
+#         current_date = month_df.iloc[-5]["Date"].strftime('%Y-%m-%d')
+# --------------------------------------------------------------------------------
 # Convert buy list csv file about QQQ Backtest Strategy
 qqq_buy_list = pd.DataFrame.from_dict(buy_list)
 # --------------------------------------------------------------------------------
@@ -133,7 +141,7 @@ for i in range(len(qqq_buy_list)):
     current_total_valuation = qqq_buy_list.iloc[i, 1] * \
         qqq_buy_list.iloc[0:i+1, 3].sum() * qqq_buy_list.iloc[i, 2]
     qqq_buy_list['revenue_rate'].iloc[i] = round(((current_total_valuation /
-                                                  investment_from_now)-1)*100, 2)
+                                                   investment_from_now)-1)*100, 2)
 
     current_value = round(qqq_buy_list.iloc[i, 1] * qqq_buy_list.iloc[i, 2], 2)
     qqq_buy_list['current_value'].iloc[i] = current_value
@@ -142,13 +150,13 @@ for i in range(len(qqq_buy_list)):
         (qqq_buy_list['current_value'].iloc[i] - max_value)/max_value*100, 2)
 
 # --------------------------------------------------------------------------------
-# Result and Save .txr file
+# Result and Save .txt file
 mdd_min = qqq_buy_list['mdd'].min()
 mdd_now = qqq_buy_list['mdd'].iloc[-1]
 
 ticker = stock.lower()
 txt_file = open(
-    f"./backtest_result/{ticker}_results.txt", "w", encoding='utf8')
+    f"./results/{ticker}_results.txt", "w", encoding='utf8')
 print("-"*50, file=txt_file)
 print(
     f"Total Investment Price {format(investment_from_now, ',')} won", file=txt_file)
@@ -156,14 +164,14 @@ print(f"How many times buy? {len(qqq_buy_list)}th", file=txt_file)
 print(
     f"Average Invest price {format(int(investment_from_now/len(qqq_buy_list)), ',')} won", file=txt_file)
 print(
-    f"Current Valuation Price {format(current_total_valuation, ',')} won", file=txt_file)
+    f"Current Valuation Price {format(int(current_total_valuation), ',')} won", file=txt_file)
 print("-"*50, file=txt_file)
 print(f"MDD (Max) : {mdd_min} %", file=txt_file)
 print(f"MDD (Now) : {mdd_now} %", file=txt_file)
 print(
     f"Revenue rate (Max) : {qqq_buy_list['revenue_rate'].max()} %", file=txt_file)
 print(
-    f"Revenue rate (Now) : {qqq_buy_list['revenue_rate'].iloc[-1]} won", file=txt_file)
+    f"Revenue rate (Now) : {qqq_buy_list['revenue_rate'].iloc[-1]} %", file=txt_file)
 print("-"*50, file=txt_file)
 
 # --------------------------------------------------------------------------------
@@ -171,7 +179,7 @@ print("-"*50, file=txt_file)
 qqq_buy_list.drop(['total', 'current_value'], axis=1, inplace=True)
 qqq_buy_list.set_index(keys=qqq_buy_list['date'], inplace=True, drop=True)
 qqq_buy_list.to_csv(
-    f"./backtest_result/{ticker}_buy_list_at25.csv", index=False)
+    f"./results/{ticker}_buy_list_at25.csv", index=False)
 # --------------------------------------------------------------------------------
 # Visualization
 fig, ax1 = plt.subplots()
@@ -205,7 +213,7 @@ ax2.text(17, -37, export_now, fontsize=10, color="black",
          bbox={'facecolor': 'whitesmoke', 'pad': 10})
 plt.title(f'Buy {stock} always at 25th', fontsize=25, pad=25, weight='bold')
 
-plt.savefig(f'./backtest_result/{ticker}_backtest_result')
+plt.savefig(f'./results/{ticker}_backtest_result')
 # qqq_buy_list.plot(style='candlestick', barup='red',
 #                   bardown='blue', xtight=True, ytight=True, grid=True)
 plt.show()
