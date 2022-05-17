@@ -12,7 +12,7 @@ plt.rcParams["figure.figsize"] = (15, 10)
 # Every month 1,000,000 won
 money = 1000000
 # NASDAQ INDEX ETF
-stock = "QQQ"
+stock = "SPY"
 # Dollar Exchange Rate
 currency = 'KRW%3DX'
 
@@ -154,7 +154,7 @@ for i in range(len(qqq_buy_list)):
 mdd_min = qqq_buy_list['mdd'].min()
 mdd_now = qqq_buy_list['mdd'].iloc[-1]
 
-ticker = stock.lower()
+ticker = stock.upper()
 txt_file = open(
     f"./results/{ticker}_results.txt", "w", encoding='utf8')
 print("-"*50, file=txt_file)

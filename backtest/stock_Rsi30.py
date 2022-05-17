@@ -11,10 +11,12 @@ import numpy as np
 
 # Every condition(RSI<35) 1,000,000 won # ★★★★★★★★★★★★★★★★★★★★
 money = 1000000
-qqq = "QQQ"
-qld = "QLD"
+qqq = "QQQ"  # NASDAQ ETF
+qld = "QLD"  # NASDAQx2 ETF
+spy = "SPY"  # S&P 500 ETF
+sso = "SPY"  # S&P 500x2 ETF
 rsi = 35
-strategy = f"{qld}_withRsi_Under35"
+strategy = f"{sso}_withRsi_Under35"
 
 # Set BackTest Start-End date # ★★★★★★★★★★★★★★★★★★★★
 startyear = 2006
