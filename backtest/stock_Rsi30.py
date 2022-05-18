@@ -16,7 +16,7 @@ qld = "QLD"  # NASDAQx2 ETF
 spy = "SPY"  # S&P 500 ETF
 sso = "SPY"  # S&P 500x2 ETF
 rsi = 35
-strategy = f"{sso}_withRsi_Under35"
+strategy = f"{sso}_withRsi_Under{rsi}"
 
 # Set BackTest Start-End date # ★★★★★★★★★★★★★★★★★★★★
 startyear = 2006
@@ -99,7 +99,7 @@ mdd_now = qqq_buy_list['mdd'].iloc[-1]
 # --------------------------------------------------------------------------------
 # Result and Save .txt file
 txt_file = open(
-    f"./results/{strategy}_results.txt", "w", encoding='utf8')
+    f"./results/withRsi/{strategy}_results.txt", "w", encoding='utf8')
 print("-"*50, file=txt_file)
 print(
     f"Total Investment Price {format(investment_from_now, ',')} won", file=txt_file)
@@ -121,7 +121,7 @@ print("-"*50, file=txt_file)
 qqq_buy_list.drop(['total', 'current_value'], axis=1, inplace=True)
 qqq_buy_list.set_index(keys=qqq_buy_list['date'], inplace=True, drop=True)
 qqq_buy_list.to_csv(
-    f"./results/{strategy}_buy_list_at25.csv", index=False)
+    f"./results/withRsi/{strategy}_buy_list.csv", index=False)
 # --------------------------------------------------------------------------------
 # Visualization
 fig, ax1 = plt.subplots()
@@ -155,7 +155,7 @@ ax2.text(17, -37, export_now, fontsize=10, color="black",
          bbox={'facecolor': 'whitesmoke', 'pad': 10})
 plt.title(f'Buy {strategy}', fontsize=25, pad=25, weight='bold')
 
-plt.savefig(f'./results/{strategy}_backtest_result')
+plt.savefig(f'./results/withRsi/{strategy}_backtest_result')
 # qqq_buy_list.plot(style='candlestick', barup='red',
 #                   bardown='blue', xtight=True, ytight=True, grid=True)
 plt.show()
