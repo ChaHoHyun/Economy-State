@@ -16,6 +16,8 @@ startdate = dt.strptime(stringdate, string_formatter)
 enddate = datetime.datetime.now()
 
 etf_list = ['tqqq', 'qld', 'xle', 'gld', 'ief']
+# merge_dataframe function을 사용하기 위해서는 뒤에가 더 길어야함.
+# 오른쪽으로 가면서, 데이터가 짧아지면 데이터 잃어 버린다.
 
 # Judge what is the cycle now?
 
@@ -48,19 +50,40 @@ def judge_cycle(df):
     return df
 
 
+def judge_cycle2(df):
+    df.reset_index(inplace=True)
+    df["year"] = df["DATE"].dt.year
+    df['cycle'] = 0
+    x_max = df['high_yield_log'].max()
+    for i in range(len(df)):
+        x = df['high_yield_log'].iloc[i]
+        y = df['10_2year_log'].iloc[i]
+        if (y < 0) and (df['T10Y3M'].iloc[i] < 0):
+            df['cycle'].iloc[i] = 'crisis'
+    # print(df[df['high_yield_log'] == x_max], x_max)
+
+
 df, now_x, now_y = raw_dataframe(startdate)
-cycle_df = judge_cycle(df)
+
+# cycle_df = judge_cycle(df)
+# judge_cycle2(df)
 
 # Collect Price Dataframe for each ETF
 df_list = []
 for x in range(len(etf_list)):
     etf = etf_list[x].upper()
-    etf_df = np.array(pdr.get_data_yahoo(etf, startdate, enddate)['Adj Close'])
-    etf_dict = {
-        'ETF': etf,
-        f'{etf}_close': etf_df
-    }
-    df_list.append(etf_dict)
+    etf_df = pdr.get_data_yahoo(etf, startdate, enddate)[['Adj Close']]
+    etf_df.rename(columns={'Adj Close': etf_list[x]}, inplace=True)
+    df_list.append(etf_df)
+# merge each dataframe
 
-nasdaq = pdr.get_data_yahoo('QQQ', startdate, enddate)[['Adj Close']]
-nasdaq.rename(columns={'Adj Close': 'QQQ'}, inplace=True)
+merge_df = pd.merge(df_list[0], df_list[1],
+                    how='right', left_index=True, right_index=True)
+if merge_df.iloc[0].isna().all():
+    print("Error!")
+else:
+    for x in range(2, len(etf_list)):
+        merge_df = pd.merge(merge_df, df_list[x],
+                            how='right', left_index=True, right_index=True)
+
+print(merge_df.head())
