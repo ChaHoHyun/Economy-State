@@ -1,23 +1,32 @@
-from backtesting import Backtest, Strategy
-from backtesting.lib import crossover
+import FinanceDataReader as fdr
+import pandas as pd
+import OpenDartReader
 
-from backtesting.test import SMA, GOOG
+data = pd.read_csv('./results/cycle/merge_final.csv')
+data.set_index('Date', inplace=True)
 
-
-class SmaCross(Strategy):
-    def init(self):
-        price = self.data.Close
-        self.ma1 = self.I(SMA, price, 10)
-        self.ma2 = self.I(SMA, price, 20)
-
-    def next(self):
-        if crossover(self.ma1, self.ma2):
-            self.buy()
-        elif crossover(self.ma2, self.ma1):
-            self.sell()
+# data['revenue_rate'] = 0
+# data['current_value'] = 0
+# data['mdd'] = 0
 
 
-bt = Backtest(GOOG, SmaCross, commission=.002,
-              exclusive_orders=True)
-stats = bt.run()
-bt.plot()
+def buy_at_risk(data):
+    sp500 = data['SPY']*0.2
+    gold = data['GLD']*0.1
+    ief = data['IEF']*0.2
+    total = round(sp500 * gold * ief, 2)
+    return total
+
+
+data['total'] = 0
+data['revenue_rate'] = 0
+for x in range(len(data)):
+    if (data['state'].iloc[x] == 'risk1'):
+        sp500 = data['SPY'].iloc[x]*0.2
+        gold = data['GLD'].iloc[x]*0.1
+        ief = data['IEF'].iloc[x]*0.2
+        data['total'].iloc[x] = round(sp500 * gold * ief, 2)
+
+    elif (data['state'].iloc[x] == 'risk1'):
+        pass
+print(data.head())
