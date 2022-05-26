@@ -16,8 +16,15 @@ def read():
     print(sh.get('E3'))
 
 
-scope = ['https://spreadsheets.google.com/feeds',
-         'https://www.googleapis.com/auth/drive']
-credentials = ServiceAccountCredentials.from_json_keyfile_name(
-    'my.json', scope)
-gc = gspread.authorize(credentials)
+json_key_path = '/mnt/d/my.json'  # JSON Key File Path
+
+gc = gspread.service_account(filename=json_key_path)
+
+spreadsheet_key = "spreadsheet_key"
+doc = gc.open_by_key(spreadsheet_key)
+
+sheet = doc.worksheet('macquerie')
+
+list_of_lists = sheet.get_all_values()
+value_a1 = sheet.get('E3')
+list_of_dicts = sheet.get_all_records()
