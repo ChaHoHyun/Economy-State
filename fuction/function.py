@@ -7,6 +7,8 @@ import talib as ta
 import matplotlib.pyplot as plt
 import numpy as np
 
+spreadsheet_key = "spreadsheet_key"
+
 now = dt.datetime.now()
 last_year = dt.datetime.now().year - 1
 
@@ -74,14 +76,14 @@ def view_div_chart(stock_df):
     plt.show()
 
 
-skt_df, last_dividends = get_dividends(sktelecom, 4, 2022, now)
-skt_divrate_top10 = get_percentile(skt_df, 90)
-print(last_dividends, skt_divrate_top10)
+# skt_df, last_dividends = get_dividends(sktelecom, 4, 2022, now)
+# skt_divrate_top10 = get_percentile(skt_df, 90)
+# print(last_dividends, skt_divrate_top10)
 
 
-maquerie_df, last_dividends = get_dividends(maquerie, 2, 2018, now)
-print(maquerie_df.head(), last_dividends)
+# maquerie_df, last_dividends = get_dividends(maquerie, 2, 2018, now)
+# print(maquerie_df.head(), last_dividends)
 
-ktng_df, last_dividends = get_dividends(ktng, 1, 2008, now)
-ktng_divrate_top10 = get_percentile(ktng_df, 90)
-print(last_dividends, ktng_divrate_top10, ktng_df['dividends_rate'].iloc[-1])
+# ktng_df, last_dividends = get_dividends(ktng, 1, 2008, now)
+# ktng_divrate_top10 = get_percentile(ktng_df, 90)
+# print(last_dividends, ktng_divrate_top10, ktng_df['dividends_rate'].iloc[-1])
