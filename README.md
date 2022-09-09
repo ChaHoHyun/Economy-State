@@ -3,6 +3,11 @@
 > **AUTHOR** : HoHyun Cha (ghgus2006@naver.com)  
 > **DATE** : '22.4/30
 
+## Reference
+
+- [Jocoding Youtube](https://www.youtube.com/watch?v=2Hxfb5HT4kE&list=WL&index=133)
+- [Jocoding Github](https://github.com/youtube-jocoding/koreainvestment-autotrade)
+
 ## Introduction
 
 1. Judge and diagnose the current global situation with past financial data.
